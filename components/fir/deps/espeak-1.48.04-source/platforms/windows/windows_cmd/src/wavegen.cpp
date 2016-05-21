@@ -1426,8 +1426,13 @@ int Wavegen()
 			if(ov < agc) agc = ov;
 			z = (z1 * agc) >> 8;
 		}
-		*out_ptr++ = z;
-		*out_ptr++ = z >> 8;
+		#if 0
+			*out_ptr++ = z;
+			*out_ptr++ = z >> 8;
+		#else
+			*out_ptr++;
+			*out_ptr++;
+		#endif
 
 		echo_buf[echo_head++] = z;
 		if(echo_head >= N_ECHO_BUF)
@@ -1522,9 +1527,13 @@ static int PlayWave(int length, int resume, unsigned char *data, int scale, int 
 		if(echo_tail >= N_ECHO_BUF)
 			echo_tail = 0;
 
-		out_ptr[0] = value;
-		out_ptr[1] = value >> 8;
-		out_ptr+=2;
+		#if 1
+			out_ptr[0] = value;
+			out_ptr[1] = value >> 8;
+			out_ptr += 2;
+		#else
+			out_ptr+=2;
+		#endif
 
 		echo_buf[echo_head++] = (value*3)/4;
 		if(echo_head >= N_ECHO_BUF)
@@ -1912,7 +1921,7 @@ int WavegenFill2(int fill_zeros)
 			}
 			wdata.n_mix_wavefile = 0;
 			wdata.amplitude_fmt = 100;
-#ifdef INCLUDE_KLATT
+#ifdef INCLUDE_KLATT_nope
 			KlattReset(1);
 #endif
 			result = PlaySilence(length,resume);
@@ -1921,7 +1930,7 @@ int WavegenFill2(int fill_zeros)
 		case WCMD_WAVE:
 			echo_complete = echo_length;
 			wdata.n_mix_wavefile = 0;
-#ifdef INCLUDE_KLATT
+#ifdef INCLUDE_KLATT_nope
 			KlattReset(1);
 #endif
 			result = PlayWave(length,resume,(unsigned char*)q[2], q[3] & 0xff, q[3] >> 8);
@@ -1950,7 +1959,7 @@ int WavegenFill2(int fill_zeros)
 			result = Wavegen2(length & 0xffff,q[1] >> 16,resume,(frame_t *)q[2],(frame_t *)q[3]);
 			break;
 
-#ifdef INCLUDE_KLATT
+#ifdef INCLUDE_KLATT_nope
 		case WCMD_KLATT2:   // as WCMD_SPECT but stop any concurrent wave file
 			wdata.n_mix_wavefile = 0;   // ... and drop through to WCMD_SPECT case
 		case WCMD_KLATT:
@@ -1993,7 +2002,7 @@ int WavegenFill2(int fill_zeros)
 				wdata.amplitude_fmt = 100;  // percentage, but value=0 means 100%
 			break;
 
-#ifdef INCLUDE_SONIC
+#ifdef INCLUDE_SONIC_nope
 		case WCMD_SONIC_SPEED:
 			sonicSpeed = (double)q[1] / 1024;
 			break;
@@ -2056,7 +2065,7 @@ int WavegenFill(int fill_zeros)
 	// fill_zeros is ignored. It is now done in the portaudio callback
 	finished = WavegenFill2(0);
 
-#ifdef INCLUDE_SONIC
+#ifdef INCLUDE_SONIC_nope
 	if(sonicSpeed > 1.0)
 	{
 		int length;
