@@ -30,3 +30,7 @@ endif()
 standard_component(${output})
 
 target_link_libraries(${output} rtaudio_static ${LINKLIBS})
+
+add_executable(rt-audio-probe ${CMAKE_CURRENT_SOURCE_DIR}/../../../probes/rt-audio.cpp)
+target_link_libraries(rt-audio-probe rtaudio_static ${LINKLIBS})
+
